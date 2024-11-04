@@ -26,6 +26,8 @@
         <!-- CVE-2021-45105 (Log4j<2.17.0): https://nvd.nist.gov/vuln/detail/CVE-2021-45105 -->
         <!-- CVE-2021-44832 (Log4j<2.17.1): https://nvd.nist.gov/vuln/detail/CVE-2021-44832 -->
         <log4j2.version>2.17.2</log4j2.version>
+
+        <reload4j.version>1.2.25</reload4j.version>
         
         <!-- CVE-2021-42550: https://nvd.nist.gov/vuln/detail/CVE-2021-42550 -->
         <logback.version>1.2.11</logback.version>
@@ -248,6 +250,13 @@
             <scope>provided</scope>
             <version>${log4j2.version}</version>
         </dependency>
+        
+		<dependency>
+            <groupId>ch.qos.reload4j</groupId>
+            <artifactId>reload4j</artifactId>
+            <scope>provided</scope>
+            <version>${reload4j.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.splunk</groupId>
@@ -311,6 +320,44 @@
                                 <additionalOption>-Xdoclint:syntax</additionalOption>
                             </additionalOptions>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Maven Shade Plugin to create the Uber JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <relocations>
+                                <!-- Relocate everything except com.splunk.logging -->
+                                <relocation>
+                                    <pattern>com.google</pattern>
+                                    <shadedPattern>com.liferay.samples.fbo.shaded.com.google</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>okhttp3</pattern>
+                                    <shadedPattern>com.liferay.samples.fbo.shaded.okhttp3</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>okio</pattern>
+                                    <shadedPattern>com.liferay.samples.fbo.shaded.okio</shadedPattern>
+                                </relocation>
+                                <!-- I wanted to shade that package but Splunk logging will not work -->
+                                <!--
+								<relocation>
+								    <pattern>com.lmax.disruptor</pattern>
+								    <shadedPattern>com.liferay.samples.fbo.shaded.com.lmax.disruptor</shadedPattern>
+								</relocation>
+								-->
+                            </relocations>
+                        </configuration>                        
                     </execution>
                 </executions>
             </plugin>
